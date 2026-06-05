@@ -1,0 +1,70 @@
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.topRow h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.topRow p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+}
+
+.badge {
+  align-self: start;
+  padding: 7px 11px;
+  border-radius: var(--radius-pill);
+  background: rgba(37, 99, 235, 0.11);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.meta span {
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--background-alt);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.statusLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.statusLine strong {
+  color: var(--text);
+}
+
+.statusLine small {
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

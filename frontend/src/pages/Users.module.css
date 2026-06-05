@@ -1,0 +1,35 @@
+.panel,
+.tableCard {
+  padding: 18px;
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.search {
+  margin-top: 16px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.roleBadge {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(37, 99, 235, 0.11);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.readOnly {
+  color: var(--text-muted);
+}
+
+.tableCard select {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 9px 12px;
+}

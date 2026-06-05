@@ -1,0 +1,21 @@
+.wrap {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 32px;
+  border-radius: var(--radius-large);
+  border: 1px dashed var(--border-strong);
+  background: var(--background-alt);
+  text-align: center;
+}
+
+.wrap strong {
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.wrap p {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: 52ch;
+}

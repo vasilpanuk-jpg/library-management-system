@@ -1,0 +1,55 @@
+.card {
+  padding: 18px;
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.form input {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.form button {
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 12px 18px;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+.error {
+  color: var(--danger);
+}
+
+.info {
+  color: var(--success);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.secondary {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 10px 16px;
+  background: transparent;
+}

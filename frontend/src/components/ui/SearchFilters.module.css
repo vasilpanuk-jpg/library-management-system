@@ -1,0 +1,37 @@
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.8fr) repeat(3, minmax(160px, 1fr)) auto;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.input,
+.select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.input:focus,
+.select:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.18);
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+.reset {
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--background-alt);
+  color: var(--text);
+  font-weight: 700;
+  padding: 12px 16px;
+  cursor: pointer;
+}

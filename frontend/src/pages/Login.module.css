@@ -1,0 +1,83 @@
+.card {
+	display: grid;
+	grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+	gap: 18px;
+	padding: 18px;
+	border-radius: var(--radius-large);
+	border: 1px solid var(--border);
+	background: var(--surface);
+	box-shadow: var(--shadow-soft);
+}
+
+.form {
+	display: grid;
+	gap: 14px;
+}
+
+.form label {
+	display: grid;
+	gap: 8px;
+	color: var(--text-muted);
+}
+
+.form input {
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	padding: 12px 14px;
+}
+
+.form button {
+	margin-top: 4px;
+	border: 0;
+	border-radius: var(--radius-pill);
+	background: var(--primary);
+	color: var(--on-primary);
+	padding: 12px 18px;
+	font-weight: 700;
+}
+
+.error {
+	padding: 12px 14px;
+	border-radius: 14px;
+	background: rgba(220, 38, 38, 0.08);
+	color: var(--danger);
+	font-weight: 600;
+}
+
+.info {
+	padding: 12px 14px;
+	border-radius: 14px;
+	background: rgba(22, 163, 74, 0.08);
+	color: var(--success);
+	font-weight: 600;
+}
+
+.demoBox {
+	display: grid;
+	gap: 8px;
+	padding: 18px;
+	border-radius: 18px;
+	background: linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.08));
+}
+
+.demoBox strong {
+	color: var(--text);
+}
+
+.demoBox p {
+	margin: 0;
+	color: var(--text-muted);
+}
+
+.demoBox a {
+	margin-top: 8px;
+	color: var(--primary);
+	font-weight: 700;
+}
+
+@media (max-width: 1000px) {
+	.card {
+		grid-template-columns: 1fr;
+	}
+}
+

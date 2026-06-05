@@ -1,0 +1,28 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.tableCard {
+  padding: 18px;
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.tableCard button {
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--danger);
+  color: var(--on-primary);
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}

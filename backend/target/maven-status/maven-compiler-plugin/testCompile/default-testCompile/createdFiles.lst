@@ -1,0 +1,4 @@
+com\library\controller\BookControllerTest.class
+com\library\service\BookServiceTest.class
+com\library\integration\IntegrationTest.class
+com\library\service\BookServiceTest$Config.class

@@ -1,0 +1,51 @@
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.exportCard {
+  padding: 18px;
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.exportActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.exportActions button,
+.secondary {
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 12px 18px;
+  font-weight: 700;
+}
+
+.exportActions button {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.secondary {
+  background: rgba(15, 118, 110, 0.09);
+  color: var(--secondary);
+}
+
+@media (max-width: 1200px) {
+  .metricsGrid,
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,21 @@
+.panel {
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  padding: 18px;
+}
+
+.header h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.header p {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+}
+
+.body {
+  margin-top: 16px;
+}

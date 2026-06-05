@@ -1,0 +1,16 @@
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 24px;
+  background:var(--primary);
+  color:var(--onPrimary);
+}
+.brand{
+  font-weight:700;
+}
+.header a{
+  color:inherit;
+  margin-left:16px;
+  text-decoration:none;
+}
