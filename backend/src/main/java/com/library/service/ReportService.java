@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportService {
@@ -57,6 +58,10 @@ public class ReportService {
             }).average().orElse(0));
         }
 
+        LocalDate weekAgo = LocalDate.now().minusWeeks(1);
+        long weekNewLoans = loans.stream().filter(loan -> LocalDate.parse(loan.getIssueDate()).isAfter(weekAgo)).count();
+        long weekReturns = returnedLoans.stream().filter(loan -> loan.getReturnedAt() != null && LocalDate.parse(loan.getReturnedAt()).isAfter(weekAgo)).count();
+
         List<DashboardDto.NamedCount> popularBooks = topBooks().stream()
                 .limit(5)
                 .map(stat -> new DashboardDto.NamedCount(stat.getTitle(), stat.getCount()))
@@ -67,8 +72,22 @@ public class ReportService {
                 .map(row -> new DashboardDto.NamedCount((String) row[0], ((Number) row[1]).longValue()))
                 .toList();
 
-        return new DashboardDto(totalBooks, availableBooks, issuedBooks, overdueLoans, averageLoanDays, popularBooks,
-                readerActivity);
+        List<DashboardDto.NamedCount> weekTopBooks = loans.stream()
+                .filter(loan -> LocalDate.parse(loan.getIssueDate()).isAfter(weekAgo))
+                .collect(Collectors.groupingBy(loan -> loan.getBookId(), Collectors.counting()))
+                .entrySet().stream()
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .limit(3)
+                .map(entry -> {
+                    String title = bookRepository.findById(entry.getKey())
+                            .map(book -> book.getTitle())
+                            .orElse("ID " + entry.getKey());
+                    return new DashboardDto.NamedCount(title, entry.getValue());
+                })
+                .toList();
+
+        return new DashboardDto(totalBooks, availableBooks, issuedBooks, overdueLoans, averageLoanDays, weekNewLoans, weekReturns, popularBooks,
+                readerActivity, weekTopBooks);
     }
 
     public byte[] exportExcel() throws Exception {
@@ -76,40 +95,32 @@ public class ReportService {
         List<BookStats> stats = topBooks();
         
         try (XSSFWorkbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            // Sheet 1: Dashboard Summary
             XSSFSheet summarySheet = wb.createSheet("Зведення");
             int row = 0;
             
-            // Title
             var titleRow = summarySheet.createRow(row++);
             titleRow.createCell(0).setCellValue("ЗВІТ ПРО СТАН БІБЛІОТЕЧНОГО ФОНДУ");
             titleRow.createCell(1).setCellValue(java.time.LocalDate.now().toString());
             
-            row++; // Empty row
+            row++;
             
-            // Fund state section
             var fundHeader = summarySheet.createRow(row++);
             fundHeader.createCell(0).setCellValue("СТАН ФОНДУ");
             
-            var totalRow = summarySheet.createRow(row++);
-            totalRow.createCell(0).setCellValue("Всього примірників:");
-            totalRow.createCell(1).setCellValue(dashboard.getTotalBooks());
+            summarySheet.createRow(row++).createCell(0).setCellValue("Всього примірників:");
+                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getTotalBooks());
             
-            var availableRow = summarySheet.createRow(row++);
-            availableRow.createCell(0).setCellValue("В наявності:");
-            availableRow.createCell(1).setCellValue(dashboard.getAvailableBooks());
+            summarySheet.createRow(row++).createCell(0).setCellValue("В наявності:");
+                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getAvailableBooks());
             
-            var issuedRow = summarySheet.createRow(row++);
-            issuedRow.createCell(0).setCellValue("Видані:");
-            issuedRow.createCell(1).setCellValue(dashboard.getIssuedBooks());
+            summarySheet.createRow(row++).createCell(0).setCellValue("Видані:");
+                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getIssuedBooks());
             
-            var overdueRow = summarySheet.createRow(row++);
-            overdueRow.createCell(0).setCellValue("Прострочені:");
-            overdueRow.createCell(1).setCellValue(dashboard.getOverdueLoans());
+            summarySheet.createRow(row++).createCell(0).setCellValue("Прострочені:");
+                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getOverdueLoans());
             
-            row++; // Empty row
+            row++;
             
-            // Reader activity section
             var activityHeader = summarySheet.createRow(row++);
             activityHeader.createCell(0).setCellValue("АКТИВНІСТЬ ЧИТАЧІВ");
             
@@ -123,9 +134,8 @@ public class ReportService {
                 r.createCell(1).setCellValue(reader.getCount());
             }
             
-            row++; // Empty row
+            row++;
             
-            // Popular books section
             var popularHeader = summarySheet.createRow(row++);
             popularHeader.createCell(0).setCellValue("ПОПУЛЯРНІ КНИГИ");
             
@@ -139,7 +149,6 @@ public class ReportService {
                 r.createCell(1).setCellValue(s.getCount());
             }
             
-            // Auto-size columns
             summarySheet.autoSizeColumn(0);
             summarySheet.autoSizeColumn(1);
             
@@ -155,74 +164,87 @@ public class ReportService {
             PDPage page = new PDPage();
             doc.addPage(page);
             PDPageContentStream cs = new PDPageContentStream(doc, page);
+            
             float y = 750;
             float lineHeight = 14;
+            float leftMargin = 50;
+            float usableWidth = page.getMediaBox().getWidth() - leftMargin * 2;
             
             cs.beginText();
             cs.setFont(PDType1Font.HELVETICA_BOLD, 16);
-            cs.newLineAtOffset(50, y);
+            cs.newLineAtOffset(leftMargin, y);
             cs.showText("ЗВІТ ПРО СТАН БІБЛІОТЕЧНОГО ФОНДУ");
-            y -= 8;
-            cs.newLineAtOffset(0, -lineHeight);
+            y -= 30;
             
             cs.setFont(PDType1Font.HELVETICA, 10);
+            cs.newLineAtOffset(leftMargin, y);
             cs.showText(java.time.LocalDate.now().toString());
-            y -= 25;
+            y -= 30;
             
-            // Fund state section
             cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-            cs.newLineAtOffset(0, -y + 750);
+            cs.newLineAtOffset(leftMargin, y);
             cs.showText("СТАН ФОНДУ");
             y -= 20;
             cs.setFont(PDType1Font.HELVETICA, 11);
             
-            cs.newLineAtOffset(0, -y + 750);
-            cs.showText("Всього примірників: " + dashboard.getTotalBooks());
-            y -= lineHeight;
-            
-            cs.newLineAtOffset(0, -y + 750);
-            cs.showText("В наявності: " + dashboard.getAvailableBooks());
-            y -= lineHeight;
-            
-            cs.newLineAtOffset(0, -y + 750);
-            cs.showText("Видані: " + dashboard.getIssuedBooks());
-            y -= lineHeight;
-            
-            cs.newLineAtOffset(0, -y + 750);
-            cs.showText("Прострочені: " + dashboard.getOverdueLoans());
-            y -= 25;
-            
-            // Reader activity section
-            if (y > 200) {
-                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-                cs.newLineAtOffset(0, -y + 750);
-                cs.showText("АКТИВНІСТЬ ЧИТАЧІВ");
-                y -= 18;
-                
-                cs.setFont(PDType1Font.HELVETICA, 10);
-                for (DashboardDto.NamedCount reader : dashboard.getReaderActivity()) {
-                    cs.newLineAtOffset(0, -y + 750);
-                    cs.showText(reader.getName() + ": " + reader.getCount() + " видач");
-                    y -= lineHeight;
-                }
+            String[] fundLines = {
+                "Всього примірників: " + dashboard.getTotalBooks(),
+                "В наявності: " + dashboard.getAvailableBooks(),
+                "Видані: " + dashboard.getIssuedBooks(),
+                "Прострочені: " + dashboard.getOverdueLoans()
+            };
+            for (String line : fundLines) {
+                cs.newLineAtOffset(leftMargin, y);
+                cs.showText(line);
+                y -= lineHeight;
             }
+            y -= 10;
             
-            y -= 15;
-            
-            // Popular books section
-            if (y > 100) {
-                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-                cs.newLineAtOffset(0, -y + 750);
-                cs.showText("ПОПУЛЯРНІ КНИГИ");
-                y -= 18;
-                
-                cs.setFont(PDType1Font.HELVETICA, 10);
-                for (BookStats s : stats) {
-                    if (y < 50) break; // Don't overflow the page
-                    cs.newLineAtOffset(0, -y + 750);
-                    cs.showText(s.getTitle() + " - " + s.getCount() + " видач");
-                    y -= lineHeight;
+            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
+            cs.newLineAtOffset(leftMargin, y);
+            cs.showText("АКТИВНІСТЬ ЧИТАЧІВ");
+            y -= 18;
+            cs.setFont(PDType1Font.HELVETICA, 10);
+            for (DashboardDto.NamedCount reader : dashboard.getReaderActivity()) {
+                if (y < 80) {
+                    cs.endText();
+                    cs.close();
+                    page = new PDPage();
+                    doc.addPage(page);
+                    cs = new PDPageContentStream(doc, page);
+                    cs.beginText();
+                    y = 750;
+                    cs.setFont(PDType1Font.HELVETICA, 10);
                 }
+                cs.newLineAtOffset(leftMargin, y);
+                cs.showText(reader.getName() + ": " + reader.getCount() + " видач");
+                y -= lineHeight;
+            }
+            y -= 10;
+            
+            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
+            cs.newLineAtOffset(leftMargin, y);
+            cs.showText("ПОПУЛЯРНІ КНИГИ");
+            y -= 18;
+            cs.setFont(PDType1Font.HELVETICA, 10);
+            for (BookStats s : stats) {
+                if (y < 60) break;
+                cs.newLineAtOffset(leftMargin, y);
+                cs.showText(s.getTitle() + " - " + s.getCount() + " видач");
+                y -= lineHeight;
+            }
+            y -= 10;
+            
+            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
+            cs.newLineAtOffset(leftMargin, y);
+            cs.showText("ТОП 3 КНИГИ ТИЖНЯ");
+            y -= 18;
+            cs.setFont(PDType1Font.HELVETICA, 10);
+            for (DashboardDto.NamedCount book : dashboard.getWeekTopBooks()) {
+                if (y < 60) break;
+                cs.newLineAtOffset(leftMargin, y);
+                cs.showText(book.getName() + " - " + book.getCount() + " видач");
+                y -= lineHeight;
             }
             
             cs.endText();

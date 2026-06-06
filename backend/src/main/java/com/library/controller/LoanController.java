@@ -28,7 +28,7 @@ public class LoanController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN') or hasRole('READER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     @Operation(summary = "Оформити видачу книги")
     public ResponseEntity<LoanDto> issue(@RequestParam Long readerId,
             @RequestParam Long bookId,

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+target/
+*.jar
+*.class
+.env
+backend/.env
+frontend/.env
+.idea/
+.vscode/
+*.iml
+*.log
+*.db

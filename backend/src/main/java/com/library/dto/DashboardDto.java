@@ -15,8 +15,11 @@ public class DashboardDto {
     private long issuedBooks;
     private long overdueLoans;
     private long averageLoanDays;
+    private long weekNewLoans;
+    private long weekReturns;
     private List<NamedCount> popularBooks;
     private List<NamedCount> readerActivity;
+    private List<NamedCount> weekTopBooks;
 
     @Data
     @NoArgsConstructor
