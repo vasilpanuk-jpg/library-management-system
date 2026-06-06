@@ -4,9 +4,6 @@ import com.library.dto.BookDto;
 import com.library.model.Book;
 import com.library.repository.BookRepository;
 import com.library.repository.LoanRepository;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,10 +21,6 @@ public class BookService {
         this.loanRepository = loanRepository;
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "books::all", allEntries = true),
-            @CacheEvict(value = "books::byId", key = "#book.id", condition = "#book.id != null")
-    })
     public BookDto save(BookDto bookDto) {
         Book book = bookDto.toEntity();
         if (book.getAvailableCopies() == null) {
@@ -40,17 +33,14 @@ public class BookService {
         return toDto(saved);
     }
 
-    @Cacheable(value = "books::byId", key = "#id")
     public Optional<BookDto> findById(Long id) {
         return bookRepository.findById(id).map(this::toDto);
     }
 
-    @Cacheable(value = "books::search", key = "#title")
     public List<BookDto> searchByTitle(String title) {
         return bookRepository.findByTitleContainingIgnoreCase(title).stream().map(this::toDto).toList();
     }
 
-    @Cacheable(value = "books::all")
     public List<BookDto> findAll() {
         return bookRepository.findAll().stream().map(this::toDto).toList();
     }
@@ -66,11 +56,6 @@ public class BookService {
                 .toList();
     }
 
-    @Caching(evict = {
-            @CacheEvict(value = "books::all", allEntries = true),
-            @CacheEvict(value = "books::byId", key = "#id"),
-            @CacheEvict(value = "books::search", allEntries = true)
-    })
     public void delete(Long id) {
         bookRepository.deleteById(id);
     }

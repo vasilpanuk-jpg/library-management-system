@@ -28,7 +28,8 @@ public class EmailVerificationService {
             EmailService emailService,
             UserRepository userRepository,
             @Value("${email.verification.ttl-minutes:15}") long ttlMinutes,
-            @Value("${email.verification.resend-seconds:60}") long resendSeconds) {
+            @Value("${email.verification.resend-seconds:60}") long resendSeconds
+    ) {
         this.redisTemplate = redisTemplate;
         this.emailService = emailService;
         this.userRepository = userRepository;

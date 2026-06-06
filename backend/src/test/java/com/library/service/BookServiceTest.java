@@ -10,9 +10,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -20,20 +17,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { BookServiceTest.Config.class })
 public class BookServiceTest {
 
     @TestConfiguration
-    @EnableCaching
     static class Config {
-        @Bean
-        public CacheManager cacheManager() {
-            return new ConcurrentMapCacheManager("books::all", "books::byId", "books::search");
-        }
-
         @Bean
         public BookRepository bookRepository() {
             return Mockito.mock(BookRepository.class);
@@ -79,26 +69,17 @@ public class BookServiceTest {
     }
 
     @Test
-    void testFindAllUsesCache() {
-        var a = bookService.findAll();
-        var b = bookService.findAll();
-        assertThat(a).hasSize(1);
-        Mockito.verify(bookRepository, times(1)).findAll();
+    void testFindAll() {
+        assertThat(bookService.findAll()).hasSize(1);
     }
 
     @Test
-    void testFindByIdUsesCache() {
-        var a = bookService.findById(1L);
-        var b = bookService.findById(1L);
-        assertThat(a).isPresent();
-        Mockito.verify(bookRepository, times(1)).findById(1L);
+    void testFindById() {
+        assertThat(bookService.findById(1L)).isPresent();
     }
 
     @Test
-    void testSearchUsesCache() {
-        var a = bookService.searchByTitle("Title");
-        var b = bookService.searchByTitle("Title");
-        assertThat(a).hasSize(1);
-        Mockito.verify(bookRepository, times(1)).findByTitleContainingIgnoreCase("Title");
+    void testSearchByTitle() {
+        assertThat(bookService.searchByTitle("Title")).hasSize(1);
     }
 }

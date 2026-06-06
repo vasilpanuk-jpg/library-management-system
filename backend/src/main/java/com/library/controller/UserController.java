@@ -24,7 +24,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     @Operation(summary = "Список усіх користувачів")
     public List<UserProfileDto> all() {
         return userService.findAllProfiles();
@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/role")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Зміна ролі користувача")
     public UserProfileDto changeRole(@PathVariable Long id, @RequestBody AuthDtos.ChangeRoleRequest request) {
         return userService.changeRole(id, request.getRole());

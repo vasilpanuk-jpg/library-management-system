@@ -25,7 +25,6 @@ com\library\model\Book.class
 com\library\controller\BookController.class
 com\library\model\Loan.class
 com\library\dto\AuthDtos$RegisterRequest.class
-com\library\config\DataSeeder.class
 com\library\dto\AuthDtos.class
 com\library\controller\ReportController.class
 com\library\config\PasswordEncoderConfig.class

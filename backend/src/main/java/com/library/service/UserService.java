@@ -8,8 +8,6 @@ import com.library.model.User;
 import com.library.repository.ReaderRepository;
 import com.library.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,7 +41,6 @@ public class UserService implements UserDetailsService {
     private EmailVerificationService emailVerificationService;
 
     @Transactional
-    @CacheEvict(value = "users::byUsername", key = "#request.username")
     public User registerUser(AuthDtos.RegisterRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new ApiException(HttpStatus.CONFLICT, "Користувач вже існує");
@@ -97,7 +94,6 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    @CacheEvict(value = "users::byUsername", key = "#username")
     public UserProfileDto updateProfile(String username, AuthDtos.UpdateProfileRequest request) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Користувача не знайдено"));
@@ -135,7 +131,6 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    @CacheEvict(value = "users::byUsername", allEntries = true)
     public UserProfileDto changeRole(Long userId, String role) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Користувача не знайдено"));
@@ -144,7 +139,6 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    @Cacheable(value = "users::byUsername", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

@@ -1,0 +1,21 @@
+@startuml
+
+left to right direction
+
+actor Reader
+actor Librarian
+actor Admin
+
+Reader --> (Search Catalog)
+Reader --> (View Book Details)
+Reader --> (Request Loan)
+
+Librarian --> (Issue Book)
+Librarian --> (Return Book)
+Librarian --> (Manage Readers)
+
+Admin --> (Manage Books)
+Admin --> (Manage Staff)
+Admin --> (Generate Reports)
+
+@enduml

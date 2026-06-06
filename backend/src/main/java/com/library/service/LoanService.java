@@ -9,8 +9,6 @@ import com.library.repository.BookRepository;
 import com.library.repository.LoanRepository;
 import com.library.repository.ReaderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +33,6 @@ public class LoanService {
     }
 
     @Transactional
-    @CacheEvict(value = "loans::overdue", allEntries = true)
     public LoanDto issue(Long userId, Long bookId, Integer periodDays) {
         Reader reader = readerRepository.findByUserId(userId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Читача не знайдено"));
@@ -61,7 +58,6 @@ public class LoanService {
     }
 
     @Transactional
-    @CacheEvict(value = "loans::overdue", allEntries = true)
     public LoanDto returnBook(Long loanId) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Видачу не знайдено"));
@@ -77,7 +73,6 @@ public class LoanService {
         return LoanDto.from(loanRepository.save(loan));
     }
 
-    @Cacheable(value = "loans::overdue")
     public List<LoanDto> overdue() {
         return loanRepository.findByDueDateBeforeAndReturnedDateIsNull(LocalDate.now()).stream()
                 .map(LoanDto::from)

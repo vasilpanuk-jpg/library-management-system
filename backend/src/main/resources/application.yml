@@ -18,6 +18,19 @@ spring:
     redis:
       host: ${SPRING_REDIS_HOST:localhost}
       port: ${SPRING_REDIS_PORT:6379}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:easyenglish515253@gmail.com}
+    password: ${MAIL_PASSWORD:yrfkjncxirhrfoqw}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: ${MAIL_HOST:smtp.gmail.com}
 
 server:
   port: 8080
@@ -41,6 +54,10 @@ session:
   secure-cookie: false
 
 email:
+  smtp:
+    enabled: ${MAIL_ENABLED:true}
+
+  from-name: Technical Literature Library
   verification:
     ttl-minutes: 15
     resend-seconds: 60

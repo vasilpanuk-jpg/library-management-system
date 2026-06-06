@@ -46,14 +46,14 @@ public class BookController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     @Operation(summary = "Додати нову книгу")
     public BookDto create(@RequestBody BookDto book) {
         return bookService.save(book);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     @Operation(summary = "Оновити книгу")
     public ResponseEntity<BookDto> update(@PathVariable Long id, @RequestBody BookDto updated) {
         return bookService.findById(id).map(existing -> {
@@ -66,7 +66,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     @Operation(summary = "Видалити книгу")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         bookService.delete(id);

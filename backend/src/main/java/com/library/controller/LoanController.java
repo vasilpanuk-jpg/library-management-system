@@ -28,7 +28,7 @@ public class LoanController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN', 'ROLE_READER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN') or hasRole('READER')")
     @Operation(summary = "Оформити видачу книги")
     public ResponseEntity<LoanDto> issue(@RequestParam Long readerId,
             @RequestParam Long bookId,
@@ -37,14 +37,14 @@ public class LoanController {
     }
 
     @PutMapping("/return/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     @Operation(summary = "Повернути книгу")
     public ResponseEntity<LoanDto> returnBook(@PathVariable Long id) {
         return ResponseEntity.ok(loanService.returnBook(id));
     }
 
     @GetMapping("/overdue")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     @Operation(summary = "Прострочені видачі")
     public List<LoanDto> overdue() {
         return loanService.overdue();

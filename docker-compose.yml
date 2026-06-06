@@ -35,7 +35,12 @@ services:
       SPRING_DATASOURCE_PASSWORD: changeit
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
-      JWT_SECRET: Zm9yLWhTMjU2LXdlLW5lZWQtMzItYnl0ZXMhIQ==
+      JWT_SECRET: Zm9yLWhTMjU2LXdlLW5lZWQtMzItYnl0ZXMhIQ==JKAFlksdf
+      MAIL_ENABLED: "true"
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_USERNAME: easyenglish515253@gmail.com
+      MAIL_PASSWORD: yrfkjncxirhrfoqw
     depends_on:
       - postgres
       - redis
