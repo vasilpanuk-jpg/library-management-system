@@ -15,6 +15,16 @@ const adminLinks = [
   { to: '/profile', label: 'Профіль' },
 ]
 
+const librarianLinks = [
+  { to: '/', label: 'Dashboard' },
+  { to: '/catalog', label: 'Каталог' },
+  { to: '/books', label: 'Книги' },
+  { to: '/loans', label: 'Видачі' },
+  { to: '/overdue', label: 'Прострочки' },
+  { to: '/reports', label: 'Звіти' },
+  { to: '/profile', label: 'Профіль' },
+]
+
 const readerLinks = [
   { to: '/', label: 'Dashboard' },
   { to: '/catalog', label: 'Каталог' },
@@ -27,7 +37,11 @@ export default function TopNav() {
   const navigate = useNavigate()
   const currentUser = useLibraryStore().currentUser
 
-  const links = currentUser?.role === 'ROLE_READER' ? readerLinks : adminLinks
+  const links = currentUser?.role === 'ROLE_READER'
+    ? readerLinks
+    : currentUser?.role === 'ROLE_LIBRARIAN'
+      ? librarianLinks
+      : adminLinks
 
   const logout = async () => {
     await libraryActions.logout()

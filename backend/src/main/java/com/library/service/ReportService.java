@@ -9,8 +9,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReportService {
@@ -74,7 +71,7 @@ public class ReportService {
 
         List<DashboardDto.NamedCount> weekTopBooks = loans.stream()
                 .filter(loan -> LocalDate.parse(loan.getIssueDate()).isAfter(weekAgo))
-                .collect(Collectors.groupingBy(loan -> loan.getBookId(), Collectors.counting()))
+                .collect(java.util.stream.Collectors.groupingBy(loan -> loan.getBookId(), java.util.stream.Collectors.counting()))
                 .entrySet().stream()
                 .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
                 .limit(3)
@@ -94,8 +91,8 @@ public class ReportService {
         DashboardDto dashboard = dashboard();
         List<BookStats> stats = topBooks();
         
-        try (XSSFWorkbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            XSSFSheet summarySheet = wb.createSheet("Зведення");
+        try (org.apache.poi.xssf.usermodel.XSSFWorkbook wb = new org.apache.poi.xssf.usermodel.XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            org.apache.poi.xssf.usermodel.XSSFSheet summarySheet = wb.createSheet("Зведення");
             int row = 0;
             
             var titleRow = summarySheet.createRow(row++);
@@ -107,17 +104,21 @@ public class ReportService {
             var fundHeader = summarySheet.createRow(row++);
             fundHeader.createCell(0).setCellValue("СТАН ФОНДУ");
             
-            summarySheet.createRow(row++).createCell(0).setCellValue("Всього примірників:");
-                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getTotalBooks());
+            var totalRow = summarySheet.createRow(row++);
+            totalRow.createCell(0).setCellValue("Всього примірників:");
+            totalRow.createCell(1).setCellValue(dashboard.getTotalBooks());
             
-            summarySheet.createRow(row++).createCell(0).setCellValue("В наявності:");
-                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getAvailableBooks());
+            var availableRow = summarySheet.createRow(row++);
+            availableRow.createCell(0).setCellValue("В наявності:");
+            availableRow.createCell(1).setCellValue(dashboard.getAvailableBooks());
             
-            summarySheet.createRow(row++).createCell(0).setCellValue("Видані:");
-                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getIssuedBooks());
+            var issuedRow = summarySheet.createRow(row++);
+            issuedRow.createCell(0).setCellValue("Видані:");
+            issuedRow.createCell(1).setCellValue(dashboard.getIssuedBooks());
             
-            summarySheet.createRow(row++).createCell(0).setCellValue("Прострочені:");
-                       summarySheet.getRow(row - 1).createCell(1).setCellValue(dashboard.getOverdueLoans());
+            var overdueRow = summarySheet.createRow(row++);
+            overdueRow.createCell(0).setCellValue("Прострочені:");
+            overdueRow.createCell(1).setCellValue(dashboard.getOverdueLoans());
             
             row++;
             
@@ -160,95 +161,59 @@ public class ReportService {
     public byte[] exportPdf() throws Exception {
         DashboardDto dashboard = dashboard();
         List<BookStats> stats = topBooks();
+
         try (PDDocument doc = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PDPage page = new PDPage();
             doc.addPage(page);
-            PDPageContentStream cs = new PDPageContentStream(doc, page);
-            
-            float y = 750;
-            float lineHeight = 14;
-            float leftMargin = 50;
-            float usableWidth = page.getMediaBox().getWidth() - leftMargin * 2;
-            
-            cs.beginText();
-            cs.setFont(PDType1Font.HELVETICA_BOLD, 16);
-            cs.newLineAtOffset(leftMargin, y);
-            cs.showText("ЗВІТ ПРО СТАН БІБЛІОТЕЧНОГО ФОНДУ");
-            y -= 30;
-            
-            cs.setFont(PDType1Font.HELVETICA, 10);
-            cs.newLineAtOffset(leftMargin, y);
-            cs.showText(java.time.LocalDate.now().toString());
-            y -= 30;
-            
-            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-            cs.newLineAtOffset(leftMargin, y);
-            cs.showText("СТАН ФОНДУ");
-            y -= 20;
-            cs.setFont(PDType1Font.HELVETICA, 11);
-            
-            String[] fundLines = {
-                "Всього примірників: " + dashboard.getTotalBooks(),
-                "В наявності: " + dashboard.getAvailableBooks(),
-                "Видані: " + dashboard.getIssuedBooks(),
-                "Прострочені: " + dashboard.getOverdueLoans()
-            };
-            for (String line : fundLines) {
-                cs.newLineAtOffset(leftMargin, y);
-                cs.showText(line);
-                y -= lineHeight;
-            }
-            y -= 10;
-            
-            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-            cs.newLineAtOffset(leftMargin, y);
-            cs.showText("АКТИВНІСТЬ ЧИТАЧІВ");
-            y -= 18;
-            cs.setFont(PDType1Font.HELVETICA, 10);
-            for (DashboardDto.NamedCount reader : dashboard.getReaderActivity()) {
-                if (y < 80) {
-                    cs.endText();
-                    cs.close();
-                    page = new PDPage();
-                    doc.addPage(page);
-                    cs = new PDPageContentStream(doc, page);
-                    cs.beginText();
-                    y = 750;
-                    cs.setFont(PDType1Font.HELVETICA, 10);
+            try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
+                cs.beginText();
+                cs.setFont(PDType1Font.HELVETICA_BOLD, 16);
+                cs.newLineAtOffset(50, 750);
+                cs.showText("ЗВІТ ПРО СТАН БІБЛІОТЕЧНОГО ФОНДУ");
+                cs.newLineAtOffset(0, -30);
+                cs.setFont(PDType1Font.HELVETICA, 10);
+                cs.showText(java.time.LocalDate.now().toString());
+                cs.newLineAtOffset(0, -24);
+                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
+                cs.showText("СТАН ФОНДУ");
+                cs.newLineAtOffset(0, -18);
+                cs.setFont(PDType1Font.HELVETICA, 11);
+                cs.showText("Всього примірників: " + dashboard.getTotalBooks());
+                cs.newLineAtOffset(0, -16);
+                cs.showText("В наявності: " + dashboard.getAvailableBooks());
+                cs.newLineAtOffset(0, -16);
+                cs.showText("Видані: " + dashboard.getIssuedBooks());
+                cs.newLineAtOffset(0, -16);
+                cs.showText("Прострочені: " + dashboard.getOverdueLoans());
+                cs.newLineAtOffset(0, -24);
+                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
+                cs.showText("АКТИВНІСТЬ ЧИТАЧІВ");
+                cs.newLineAtOffset(0, -18);
+                cs.setFont(PDType1Font.HELVETICA, 10);
+                for (DashboardDto.NamedCount reader : dashboard.getReaderActivity()) {
+                    cs.showText(reader.getName() + ": " + reader.getCount() + " видач");
+                    cs.newLineAtOffset(0, -16);
                 }
-                cs.newLineAtOffset(leftMargin, y);
-                cs.showText(reader.getName() + ": " + reader.getCount() + " видач");
-                y -= lineHeight;
+                cs.newLineAtOffset(0, -10);
+                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
+                cs.showText("ПОПУЛЯРНІ КНИГИ");
+                cs.newLineAtOffset(0, -18);
+                cs.setFont(PDType1Font.HELVETICA, 10);
+                for (BookStats s : stats) {
+                    cs.showText(s.getTitle() + " - " + s.getCount() + " видач");
+                    cs.newLineAtOffset(0, -16);
+                }
+                cs.newLineAtOffset(0, -10);
+                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
+                cs.showText("ТОП 3 КНИГИ ТИЖНЯ");
+                cs.newLineAtOffset(0, -18);
+                cs.setFont(PDType1Font.HELVETICA, 10);
+                for (DashboardDto.NamedCount book : dashboard.getWeekTopBooks()) {
+                    cs.showText(book.getName() + " - " + book.getCount() + " видач");
+                    cs.newLineAtOffset(0, -16);
+                }
+                cs.endText();
             }
-            y -= 10;
-            
-            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-            cs.newLineAtOffset(leftMargin, y);
-            cs.showText("ПОПУЛЯРНІ КНИГИ");
-            y -= 18;
-            cs.setFont(PDType1Font.HELVETICA, 10);
-            for (BookStats s : stats) {
-                if (y < 60) break;
-                cs.newLineAtOffset(leftMargin, y);
-                cs.showText(s.getTitle() + " - " + s.getCount() + " видач");
-                y -= lineHeight;
-            }
-            y -= 10;
-            
-            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-            cs.newLineAtOffset(leftMargin, y);
-            cs.showText("ТОП 3 КНИГИ ТИЖНЯ");
-            y -= 18;
-            cs.setFont(PDType1Font.HELVETICA, 10);
-            for (DashboardDto.NamedCount book : dashboard.getWeekTopBooks()) {
-                if (y < 60) break;
-                cs.newLineAtOffset(leftMargin, y);
-                cs.showText(book.getName() + " - " + book.getCount() + " видач");
-                y -= lineHeight;
-            }
-            
-            cs.endText();
-            cs.close();
             doc.save(out);
             return out.toByteArray();
         }

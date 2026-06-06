@@ -98,10 +98,9 @@ export default function Reports() {
 
       {(currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ROLE_LIBRARIAN') && (
         <section className={styles.exportCard}>
-          <SectionHeader title="Експорт звітів" subtitle="Формуйте PDF або Excel одним натисканням" />
+          <SectionHeader title="Експорт звітів" subtitle="Завантажте звіт у форматі Excel" />
           <div className={styles.exportActions}>
             <button type="button" onClick={() => void download('excel')}>Завантажити Excel</button>
-            <button type="button" onClick={() => void download('pdf')}>Завантажити PDF</button>
           </div>
           {exportError && <p className={styles.exportError}>{exportError}</p>}
         </section>
