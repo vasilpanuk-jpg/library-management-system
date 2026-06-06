@@ -89,15 +89,19 @@ function mapLoan(loan: LoanApi): LoanRecord {
   }
 }
 
+function toInt(value: number) {
+  return Math.round(Number(value ?? 0))
+}
+
 function mapDashboard(data: DashboardApi): DashboardSnapshot {
   return {
-    totalBooks: data.totalBooks,
-    availableBooks: data.availableBooks,
-    issuedBooks: data.issuedBooks,
-    overdueLoans: data.overdueLoans,
-    averageLoanDays: data.averageLoanDays,
-    popularBooks: data.popularBooks.map((item) => ({ title: item.name, count: item.count })),
-    readerActivity: data.readerActivity.map((item) => ({ name: item.name, count: item.count })),
+    totalBooks: toInt(data.totalBooks),
+    availableBooks: toInt(data.availableBooks),
+    issuedBooks: toInt(data.issuedBooks),
+    overdueLoans: toInt(data.overdueLoans),
+    averageLoanDays: toInt(data.averageLoanDays),
+    popularBooks: data.popularBooks.map((item) => ({ title: item.name, count: toInt(item.count) })),
+    readerActivity: data.readerActivity.map((item) => ({ name: item.name, count: toInt(item.count) })),
   }
 }
 
@@ -244,14 +248,29 @@ export const libraryApi = {
     const { data } = await api.get<DashboardApi>('/api/reports/dashboard')
     return mapDashboard(data)
   },
+
+  async exportReport(type: 'excel' | 'pdf') {
+    try {
+      const response = await api.get(`/api/reports/export?type=${type}`, { responseType: 'blob' })
+      const contentType = String(response.headers['content-type'] ?? '')
+      if (contentType.includes('application/json')) {
+        const text = await (response.data as Blob).text()
+        const payload = JSON.parse(text) as { message?: string }
+        return { ok: false as const, message: payload.message ?? 'Не вдалося завантажити звіт' }
+      }
+      return { ok: true as const, blob: response.data as Blob }
+    } catch (error) {
+      return { ok: false as const, message: extractError(error) }
+    }
+  },
 }
 
 export function buildReportMetrics(snapshot: DashboardSnapshot): ReportMetric[] {
   return [
-    { label: 'Загальна кількість книг', value: snapshot.totalBooks },
-    { label: 'Доступні книги', value: snapshot.availableBooks },
-    { label: 'Видані книги', value: snapshot.issuedBooks },
-    { label: 'Прострочені видачі', value: snapshot.overdueLoans },
-    { label: 'Середній час читання', value: snapshot.averageLoanDays, detail: 'днів' },
+    { label: 'Загальна кількість книг', value: toInt(snapshot.totalBooks) },
+    { label: 'Доступні книги', value: toInt(snapshot.availableBooks) },
+    { label: 'Видані книги', value: toInt(snapshot.issuedBooks) },
+    { label: 'Прострочені видачі', value: toInt(snapshot.overdueLoans) },
+    { label: 'Середній час читання', value: toInt(snapshot.averageLoanDays), detail: 'днів' },
   ]
 }

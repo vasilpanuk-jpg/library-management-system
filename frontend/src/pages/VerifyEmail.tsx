@@ -38,7 +38,7 @@ export default function VerifyEmail() {
   return (
     <PageShell
       title="Підтвердження email"
-      subtitle="Введіть 8-значний код із листа. У режимі розробки код також виводиться в логах бекенду."
+      subtitle="Введіть 8-значний код, який надійшов на вашу пошту."
     >
       <section className={styles.card}>
         <form className={styles.form} onSubmit={submit}>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import PageShell from '../components/layout/PageShell'
 import SectionHeader from '../components/ui/SectionHeader'
 import DataTable from '../components/ui/DataTable'
@@ -10,6 +10,10 @@ import { UserRole } from '../types/library'
 export default function Users() {
   const { currentUser, users } = useLibraryStore()
   const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    void libraryActions.loadUsers()
+  }, [])
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => [user.username, user.fullName, user.email, user.phone, user.role].join(' ').toLowerCase().includes(query.toLowerCase()))

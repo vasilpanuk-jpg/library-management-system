@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Bar } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
@@ -8,12 +8,17 @@ import StatCard from '../components/ui/StatCard'
 import ChartPanel from '../components/ui/ChartPanel'
 import BookCard from '../components/ui/BookCard'
 import styles from './Dashboard.module.css'
-import { selectDashboardSnapshot, selectReportMetrics, useLibraryStore } from '../state/libraryStore'
+import { libraryActions, selectDashboardSnapshot, selectReportMetrics, useLibraryStore } from '../state/libraryStore'
+import { integerBarChartOptions } from '../utils/chartOptions'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default function Dashboard() {
   const { books, currentUser } = useLibraryStore()
+
+  useEffect(() => {
+    void libraryActions.refresh()
+  }, [])
   const snapshot = selectDashboardSnapshot()
   const metrics = selectReportMetrics()
   const featuredBooks = books.slice().sort((left, right) => right.issuedCount - left.issuedCount).slice(0, 3)
@@ -23,7 +28,7 @@ export default function Dashboard() {
     datasets: [
       {
         label: 'Видачі',
-        data: snapshot.popularBooks.map((book) => book.count),
+        data: snapshot.popularBooks.map((book) => Math.round(book.count)),
         backgroundColor: 'rgba(37, 99, 235, 0.72)',
         borderRadius: 10,
       },
@@ -35,7 +40,7 @@ export default function Dashboard() {
     datasets: [
       {
         label: 'Активність читачів',
-        data: snapshot.readerActivity.map((item) => item.count),
+        data: snapshot.readerActivity.map((item) => Math.round(item.count)),
         backgroundColor: 'rgba(15, 118, 110, 0.72)',
         borderRadius: 10,
       },
@@ -92,11 +97,11 @@ export default function Dashboard() {
 
       <section className={styles.chartsGrid}>
         <ChartPanel title="Найпопулярніші книги" subtitle="Графік кількості видач по книгах">
-          <Bar data={popularData} />
+          <Bar data={popularData} options={integerBarChartOptions} />
         </ChartPanel>
 
         <ChartPanel title="Активність читачів" subtitle="Скільки книг бере кожен читач">
-          <Bar data={activityData} />
+          <Bar data={activityData} options={integerBarChartOptions} />
         </ChartPanel>
       </section>
 

@@ -58,6 +58,22 @@
   color: var(--danger);
 }
 
+.error {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+}
+
+.success {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(22, 163, 74, 0.08);
+  color: var(--success);
+}
+
 @media (max-width: 1100px) {
   .formGrid {
     grid-template-columns: 1fr;

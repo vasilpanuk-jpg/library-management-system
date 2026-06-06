@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Bar } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import PageShell from '../components/layout/PageShell'
@@ -6,13 +6,15 @@ import SectionHeader from '../components/ui/SectionHeader'
 import StatCard from '../components/ui/StatCard'
 import ChartPanel from '../components/ui/ChartPanel'
 import styles from './Reports.module.css'
-import api from '../services/api'
+import { libraryApi } from '../services/libraryApi'
 import { selectDashboardSnapshot, selectReportMetrics, useLibraryStore } from '../state/libraryStore'
+import { integerBarChartOptions } from '../utils/chartOptions'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default function Reports() {
   useLibraryStore()
+  const [exportError, setExportError] = useState<string | null>(null)
   const metrics = selectReportMetrics()
   const snapshot = selectDashboardSnapshot()
 
@@ -21,7 +23,7 @@ export default function Reports() {
     datasets: [
       {
         label: 'Одиниці',
-        data: [snapshot.totalBooks, snapshot.availableBooks, snapshot.issuedBooks, snapshot.overdueLoans],
+        data: [snapshot.totalBooks, snapshot.availableBooks, snapshot.issuedBooks, snapshot.overdueLoans].map(Math.round),
         backgroundColor: ['rgba(37, 99, 235, 0.72)', 'rgba(22, 163, 74, 0.72)', 'rgba(217, 119, 6, 0.72)', 'rgba(220, 38, 38, 0.72)'],
         borderRadius: 10,
       },
@@ -33,7 +35,7 @@ export default function Reports() {
     datasets: [
       {
         label: 'Видачі',
-        data: snapshot.popularBooks.map((item) => item.count),
+        data: snapshot.popularBooks.map((item) => Math.round(item.count)),
         backgroundColor: 'rgba(15, 118, 110, 0.72)',
         borderRadius: 10,
       },
@@ -45,7 +47,7 @@ export default function Reports() {
     datasets: [
       {
         label: 'Активність',
-        data: snapshot.readerActivity.map((item) => item.count),
+        data: snapshot.readerActivity.map((item) => Math.round(item.count)),
         backgroundColor: 'rgba(250, 204, 21, 0.82)',
         borderRadius: 10,
       },
@@ -53,12 +55,18 @@ export default function Reports() {
   }
 
   const download = async (type: 'excel' | 'pdf') => {
-    const response = await api.get(`/api/reports/export?type=${type}`, { responseType: 'blob' })
-    const url = window.URL.createObjectURL(new Blob([response.data]))
+    setExportError(null)
+    const result = await libraryApi.exportReport(type)
+    if (!result.ok) {
+      setExportError(result.message)
+      return
+    }
+    const url = window.URL.createObjectURL(result.blob)
     const anchor = document.createElement('a')
     anchor.href = url
     anchor.download = `library-report.${type === 'excel' ? 'xlsx' : 'pdf'}`
     anchor.click()
+    window.URL.revokeObjectURL(url)
   }
 
   return (
@@ -79,24 +87,25 @@ export default function Reports() {
 
       <section className={styles.chartGrid}>
         <ChartPanel title="Стан фонду" subtitle="Загальна кількість, доступні та видані книги">
-          <Bar data={inventoryData} />
+          <Bar data={inventoryData} options={integerBarChartOptions} />
         </ChartPanel>
 
         <ChartPanel title="Найпопулярніші книги" subtitle="Книги з найбільшою кількістю видач">
-          <Bar data={popularData} />
+          <Bar data={popularData} options={integerBarChartOptions} />
         </ChartPanel>
 
         <ChartPanel title="Активність читачів" subtitle="Кількість взятих книг по читачах">
-          <Bar data={activityData} />
+          <Bar data={activityData} options={integerBarChartOptions} />
         </ChartPanel>
       </section>
 
       <section className={styles.exportCard}>
         <SectionHeader title="Експорт звітів" subtitle="Формуйте PDF або Excel одним натисканням" />
         <div className={styles.exportActions}>
-          <button type="button" onClick={() => download('excel')}>Завантажити Excel</button>
-          <button type="button" className={styles.secondary} onClick={() => download('pdf')}>Завантажити PDF</button>
+          <button type="button" onClick={() => void download('excel')}>Завантажити Excel</button>
+          <button type="button" className={styles.secondary} onClick={() => void download('pdf')}>Завантажити PDF</button>
         </div>
+        {exportError && <p className={styles.exportError}>{exportError}</p>}
       </section>
     </PageShell>
   )

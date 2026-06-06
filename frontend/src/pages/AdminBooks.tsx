@@ -21,13 +21,24 @@ export default function AdminBooks() {
   const { books } = useLibraryStore()
   const [form, setForm] = useState(emptyForm)
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   const save = async () => {
+    setError(null)
+    setSuccess(null)
+    if (!form.title.trim() || !form.author.trim()) {
+      setError('Заповніть назву та автора книги')
+      return
+    }
+
     const payload = {
       ...form,
       keywords: form.keywords.split(',').map((item) => item.trim()).filter(Boolean),
     }
 
+    try {
+    const editing = selectedBookId
     if (selectedBookId) {
       await libraryActions.updateBook(selectedBookId, {
         title: payload.title,
@@ -50,6 +61,10 @@ export default function AdminBooks() {
 
     setSelectedBookId(null)
     setForm(emptyForm)
+    setSuccess(editing ? 'Книгу оновлено' : 'Книгу додано')
+    } catch {
+      setError('Не вдалося зберегти книгу. Перевірте права доступу та заповнені поля.')
+    }
   }
 
   const edit = (bookId: number) => {
@@ -70,10 +85,17 @@ export default function AdminBooks() {
   }
 
   const remove = async (bookId: number) => {
-    await libraryActions.deleteBook(bookId)
-    if (selectedBookId === bookId) {
-      setSelectedBookId(null)
-      setForm(emptyForm)
+    setError(null)
+    setSuccess(null)
+    try {
+      await libraryActions.deleteBook(bookId)
+      if (selectedBookId === bookId) {
+        setSelectedBookId(null)
+        setForm(emptyForm)
+      }
+      setSuccess('Книгу списано')
+    } catch {
+      setError('Не вдалося видалити книгу')
     }
   }
 
@@ -111,8 +133,10 @@ export default function AdminBooks() {
             <input type="number" min="1" value={form.totalCopies} onChange={(event) => setForm((current) => ({ ...current, totalCopies: Number(event.target.value) }))} />
           </label>
         </div>
+        {error && <div className={styles.error}>{error}</div>}
+        {success && <div className={styles.success}>{success}</div>}
         <div className={styles.actions}>
-          <button type="button" onClick={save}>
+          <button type="button" onClick={() => void save()}>
             {selectedBookId ? 'Зберегти зміни' : 'Додати книгу'}
           </button>
           {selectedBookId && (

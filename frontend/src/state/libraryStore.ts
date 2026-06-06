@@ -85,16 +85,28 @@ function getState() {
 }
 
 async function refreshCoreData() {
-  const [books, loans, dashboard] = await Promise.all([
+  const [booksResult, loansResult, dashboardResult, usersResult] = await Promise.allSettled([
     libraryApi.fetchBooks(),
     libraryApi.fetchLoans(),
     libraryApi.fetchDashboard(),
+    state.currentUser?.role === 'ROLE_ADMIN' || state.currentUser?.role === 'ROLE_LIBRARIAN'
+      ? libraryApi.fetchUsers()
+      : Promise.resolve(state.users),
   ])
-  let users = state.users
-  if (state.currentUser?.role === 'ROLE_ADMIN' || state.currentUser?.role === 'ROLE_LIBRARIAN') {
-    users = await libraryApi.fetchUsers()
-  }
-  setState({ books, loans, dashboard, users, error: null })
+
+  const books = booksResult.status === 'fulfilled' ? booksResult.value : state.books
+  const loans = loansResult.status === 'fulfilled' ? loansResult.value : state.loans
+  const dashboard = dashboardResult.status === 'fulfilled' ? dashboardResult.value : state.dashboard
+  const users = usersResult.status === 'fulfilled' ? usersResult.value : state.users
+
+  const failed = [booksResult, loansResult, dashboardResult, usersResult].some((result) => result.status === 'rejected')
+  setState({
+    books,
+    loans,
+    dashboard,
+    users,
+    error: failed ? 'Не вдалося оновити частину даних. Спробуйте ще раз.' : null,
+  })
 }
 
 export function useLibraryStore() {
@@ -244,6 +256,20 @@ export const libraryActions = {
       users: state.users.map((user) => (user.id === userId ? updated : user)),
       currentUser: state.currentUser?.id === userId ? updated : state.currentUser,
     })
+  },
+
+  async loadUsers() {
+    if (state.currentUser?.role !== 'ROLE_ADMIN' && state.currentUser?.role !== 'ROLE_LIBRARIAN') return
+    try {
+      const users = await libraryApi.fetchUsers()
+      setState({ users, error: null })
+    } catch {
+      setState({ error: 'Не вдалося завантажити користувачів' })
+    }
+  },
+
+  async refresh() {
+    await refreshCoreData()
   },
 }
 
