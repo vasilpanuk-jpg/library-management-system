@@ -16,23 +16,26 @@ import Users from './pages/Users'
 import Profile from './pages/Profile'
 import styles from './App.module.css'
 
-function AppLoader({ children }: { children: React.ReactNode }) {
-  const loading = useLibraryStore((state) => state.loading)
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <div style={{ color: 'var(--text-muted)' }}>Завантаження...</div>
-      </div>
-    )
-  }
-  return <>{children}</>
-}
-
 export default function App(){
   const { initialize } = libraryActions
+  const loading = useLibraryStore((state) => state.loading)
+  
   useEffect(() => {
     void initialize()
   }, [initialize])
+
+  if (loading) {
+    return (
+      <div className={styles.app}>
+        <TopNav />
+        <main className={styles.main}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '16px' }}>Завантаження...</div>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.app}>

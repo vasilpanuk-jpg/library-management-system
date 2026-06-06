@@ -155,74 +155,52 @@ public class ReportService {
             PDPage page = new PDPage();
             doc.addPage(page);
             PDPageContentStream cs = new PDPageContentStream(doc, page);
-            float y = 750;
-            float lineHeight = 14;
             
+            // Title
             cs.beginText();
             cs.setFont(PDType1Font.HELVETICA_BOLD, 16);
-            cs.newLineAtOffset(50, y);
+            cs.newLineAtOffset(50, 750);
             cs.showText("ЗВІТ ПРО СТАН БІБЛІОТЕЧНОГО ФОНДУ");
-            y -= 8;
-            cs.newLineAtOffset(0, -lineHeight);
             
+            // Date
+            cs.newLineAtOffset(0, -25);
             cs.setFont(PDType1Font.HELVETICA, 10);
             cs.showText(java.time.LocalDate.now().toString());
-            y -= 25;
             
             // Fund state section
-            cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-            cs.newLineAtOffset(0, -y + 750);
+            cs.newLineAtOffset(0, -30);
+            cs.setFont(PDType1Font.HELVETICA_BOLD, 12);
             cs.showText("СТАН ФОНДУ");
-            y -= 20;
+            cs.newLineAtOffset(0, -18);
             cs.setFont(PDType1Font.HELVETICA, 11);
-            
-            cs.newLineAtOffset(0, -y + 750);
             cs.showText("Всього примірників: " + dashboard.getTotalBooks());
-            y -= lineHeight;
-            
-            cs.newLineAtOffset(0, -y + 750);
+            cs.newLineAtOffset(0, -15);
             cs.showText("В наявності: " + dashboard.getAvailableBooks());
-            y -= lineHeight;
-            
-            cs.newLineAtOffset(0, -y + 750);
+            cs.newLineAtOffset(0, -15);
             cs.showText("Видані: " + dashboard.getIssuedBooks());
-            y -= lineHeight;
-            
-            cs.newLineAtOffset(0, -y + 750);
+            cs.newLineAtOffset(0, -15);
             cs.showText("Прострочені: " + dashboard.getOverdueLoans());
-            y -= 25;
             
             // Reader activity section
-            if (y > 200) {
-                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-                cs.newLineAtOffset(0, -y + 750);
-                cs.showText("АКТИВНІСТЬ ЧИТАЧІВ");
-                y -= 18;
-                
-                cs.setFont(PDType1Font.HELVETICA, 10);
-                for (DashboardDto.NamedCount reader : dashboard.getReaderActivity()) {
-                    cs.newLineAtOffset(0, -y + 750);
-                    cs.showText(reader.getName() + ": " + reader.getCount() + " видач");
-                    y -= lineHeight;
-                }
+            cs.newLineAtOffset(0, -30);
+            cs.setFont(PDType1Font.HELVETICA_BOLD, 12);
+            cs.showText("АКТИВНІСТЬ ЧИТАЧІВ");
+            cs.newLineAtOffset(0, -18);
+            cs.setFont(PDType1Font.HELVETICA, 10);
+            for (DashboardDto.NamedCount reader : dashboard.getReaderActivity()) {
+                cs.showText(reader.getName() + ": " + reader.getCount() + " видач");
+                cs.newLineAtOffset(0, -15);
             }
             
-            y -= 15;
-            
             // Popular books section
-            if (y > 100) {
-                cs.setFont(PDType1Font.HELVETICA_BOLD, 13);
-                cs.newLineAtOffset(0, -y + 750);
-                cs.showText("ПОПУЛЯРНІ КНИГИ");
-                y -= 18;
-                
-                cs.setFont(PDType1Font.HELVETICA, 10);
-                for (BookStats s : stats) {
-                    if (y < 50) break; // Don't overflow the page
-                    cs.newLineAtOffset(0, -y + 750);
-                    cs.showText(s.getTitle() + " - " + s.getCount() + " видач");
-                    y -= lineHeight;
-                }
+            cs.newLineAtOffset(0, -20);
+            cs.setFont(PDType1Font.HELVETICA_BOLD, 12);
+            cs.showText("ПОПУЛЯРНІ КНИГИ");
+            cs.newLineAtOffset(0, -18);
+            cs.setFont(PDType1Font.HELVETICA, 10);
+            for (BookStats s : stats) {
+                cs.showText(s.getTitle() + " - " + s.getCount() + " видач");
+                cs.newLineAtOffset(0, -15);
             }
             
             cs.endText();

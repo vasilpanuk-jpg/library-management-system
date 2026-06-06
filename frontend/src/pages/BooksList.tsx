@@ -8,7 +8,7 @@ import BookCard from '../components/ui/BookCard'
 import EmptyState from '../components/ui/EmptyState'
 import styles from './BooksList.module.css'
 import { BookFilters } from '../types/library'
-import { libraryActions, selectBooks, useLibraryStore } from '../state/libraryStore'
+import { selectBooks, useLibraryStore } from '../state/libraryStore'
 
 const defaultFilters: BookFilters = {
   query: '',
@@ -23,15 +23,6 @@ export default function BooksList() {
   const categories = useMemo(() => Array.from(new Set(allBooks.map((book) => book.category))).sort(), [allBooks])
   const books = useMemo(() => selectBooks(filters), [filters])
   const navigate = useNavigate()
-
-  const openIssueFlow = async (bookId: number) => {
-    if (!currentUser) return
-    if (currentUser.role === 'ROLE_READER') {
-      await libraryActions.issueLoan({ bookId, readerId: currentUser.id })
-      return
-    }
-    navigate('/loans')
-  }
 
   return (
     <PageShell
@@ -58,11 +49,6 @@ export default function BooksList() {
                 book={book}
                 actions={
                   <>
-                    {currentUser?.role === 'ROLE_READER' && (
-                      <button type="button" onClick={() => openIssueFlow(book.id)} disabled={book.availableCopies === 0}>
-                        {book.availableCopies > 0 ? 'Позичити' : 'Немає в наявності'}
-                      </button>
-                    )}
                     {(currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ROLE_LIBRARIAN') && (
                       <Link to="/loans" className={styles.secondaryButton}>
                         Видати читачу
