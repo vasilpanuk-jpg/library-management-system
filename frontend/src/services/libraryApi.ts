@@ -110,6 +110,7 @@ function extractError(error: unknown): string {
     const response = (error as { response?: { data?: { message?: string } } }).response
     if (response?.data?.message) return response.data.message
   }
+  if (error instanceof Error) return error.message
   return 'Сталася помилка під час запиту'
 }
 
@@ -167,11 +168,6 @@ export const libraryApi = {
 
   async logout() {
     await api.post('/api/auth/logout')
-  },
-
-  async fetchCurrentUser() {
-    const { data } = await api.get<UserProfile>('/api/users/me')
-    return data
   },
 
   async fetchUsers() {

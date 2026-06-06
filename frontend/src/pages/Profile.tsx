@@ -11,9 +11,17 @@ export default function Profile() {
   const [email, setEmail] = useState(currentUser?.email ?? '')
   const [phone, setPhone] = useState(currentUser?.phone ?? '')
   const [password, setPassword] = useState('')
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const save = async () => {
-    await libraryActions.updateProfile({ fullName, email, phone, password: password || undefined })
+    setMessage(null)
+    try {
+      await libraryActions.updateProfile({ fullName, email, phone, password: password || undefined })
+      setPassword('')
+      setMessage({ type: 'success', text: password ? 'Профіль та пароль оновлено' : 'Профіль оновлено' })
+    } catch {
+      setMessage({ type: 'error', text: 'Не вдалося оновити профіль. Спробуйте ще раз.' })
+    }
   }
 
   return (
@@ -48,8 +56,16 @@ export default function Profile() {
           <label>
             <span>Новий пароль</span>
             <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+            <small className={password ? styles.passwordHint : undefined}>
+              {password ? 'Пароль буде змінено після збереження' : 'Залиште порожнім, щоб залишити поточний пароль'}
+            </small>
           </label>
         </div>
+        {message && (
+          <div className={message.type === 'success' ? styles.successMessage : styles.errorMessage}>
+            {message.text}
+          </div>
+        )}
         <button className={styles.save} type="button" onClick={save}>
           Зберегти зміни
         </button>

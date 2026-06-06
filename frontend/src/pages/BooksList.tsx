@@ -40,10 +40,10 @@ export default function BooksList() {
       actions={currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ROLE_LIBRARIAN' ? <Link className={styles.secondaryAction} to="/books">Керування фондом</Link> : undefined}
     >
       <section className={styles.statsGrid}>
-        <StatCard label="Усього книг" value={allBooks.length} tone="primary" />
-        <StatCard label="У наявності" value={allBooks.reduce((sum, book) => sum + book.availableCopies, 0)} tone="success" />
-        <StatCard label="Видані" value={allBooks.reduce((sum, book) => sum + (book.totalCopies - book.availableCopies), 0)} tone="warning" />
-        <StatCard label="Категорій" value={categories.length} tone="secondary" />
+        <StatCard label="Усього примірників" value={allBooks.reduce((sum, book) => sum + (book.totalCopies || 0), 0)} tone="primary" />
+        <StatCard label="У наявності" value={allBooks.reduce((sum, book) => sum + (book.availableCopies || 0), 0)} tone="success" />
+        <StatCard label="Видані" value={allBooks.reduce((sum, book) => sum + ((book.totalCopies || 0) - (book.availableCopies || 0)), 0)} tone="warning" />
+        <StatCard label="Найменувань" value={allBooks.length} tone="secondary" />
       </section>
 
       <SearchFilters filters={filters} categories={categories} onChange={(patch) => setFilters((current) => ({ ...current, ...patch }))} onReset={() => setFilters(defaultFilters)} />

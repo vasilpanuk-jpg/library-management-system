@@ -311,27 +311,7 @@ export function selectReportMetrics(): ReportMetric[] {
   return buildReportMetrics(selectDashboardSnapshot())
 }
 
-export function getCategories() {
-  return Array.from(new Set(state.books.map((book) => book.category))).sort()
-}
-
 export function getUsersByRole(role?: UserRole) {
   if (!role) return state.users
   return state.users.filter((user) => user.role === role)
-}
-
-export function getCurrentUser() {
-  return state.currentUser
-}
-
-export function getAllUsers() {
-  return state.users
-}
-
-export function getAllBooks() {
-  return state.books
-}
-
-export function getAllLoans() {
-  return selectLoans()
 }

@@ -33,6 +33,30 @@
   padding: 12px 14px;
 }
 
+.passwordHint {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.successMessage {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.errorMessage {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+  font-weight: 500;
+}
+
 .save {
   margin-top: 18px;
   border: 0;

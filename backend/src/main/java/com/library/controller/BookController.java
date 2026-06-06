@@ -49,6 +49,15 @@ public class BookController {
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_LIBRARIAN')")
     @Operation(summary = "Додати нову книгу")
     public BookDto create(@RequestBody BookDto book) {
+        if (book.getTitle() == null || book.getTitle().isBlank()) {
+            throw new IllegalStateException("Назва книги обов'язкова");
+        }
+        if (book.getAuthor() == null || book.getAuthor().isBlank()) {
+            throw new IllegalStateException("Автор книги обов'язковий");
+        }
+        if (book.getTotalCopies() == null || book.getTotalCopies() < 1) {
+            throw new IllegalStateException("Кількість екземплярів має бути від 1");
+        }
         return bookService.save(book);
     }
 

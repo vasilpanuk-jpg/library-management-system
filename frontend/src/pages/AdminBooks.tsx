@@ -38,32 +38,33 @@ export default function AdminBooks() {
     }
 
     try {
-    const editing = selectedBookId
-    if (selectedBookId) {
-      await libraryActions.updateBook(selectedBookId, {
-        title: payload.title,
-        author: payload.author,
-        isbn: payload.isbn,
-        category: payload.category,
-        keywords: payload.keywords,
-        year: payload.year,
-        publisher: payload.publisher,
-        location: payload.location,
-        totalCopies: payload.totalCopies,
-        availableCopies: payload.totalCopies,
-      })
-    } else {
-      await libraryActions.addBook({
-        ...payload,
-        availableCopies: payload.totalCopies,
-      })
-    }
+      const editing = selectedBookId
+      if (selectedBookId) {
+        await libraryActions.updateBook(selectedBookId, {
+          title: payload.title,
+          author: payload.author,
+          isbn: payload.isbn,
+          category: payload.category,
+          keywords: payload.keywords,
+          year: payload.year,
+          publisher: payload.publisher,
+          location: payload.location,
+          totalCopies: payload.totalCopies,
+          availableCopies: payload.totalCopies,
+        })
+      } else {
+        await libraryActions.addBook({
+          ...payload,
+          availableCopies: payload.totalCopies,
+        })
+      }
 
-    setSelectedBookId(null)
-    setForm(emptyForm)
-    setSuccess(editing ? 'Книгу оновлено' : 'Книгу додано')
-    } catch {
-      setError('Не вдалося зберегти книгу. Перевірте права доступу та заповнені поля.')
+      setSelectedBookId(null)
+      setForm(emptyForm)
+      setSuccess(editing ? 'Книгу оновлено' : 'Книгу додано')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Перевірте правильність даних'
+      setError(`Помилка: ${message}`)
     }
   }
 

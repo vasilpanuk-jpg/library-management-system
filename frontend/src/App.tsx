@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { libraryActions } from './state/libraryStore'
+import { libraryActions, useLibraryStore } from './state/libraryStore'
 import TopNav from './components/layout/TopNav'
 import ProtectedRoute from './components/ProtectedRoute'
 import Dashboard from './pages/Dashboard'
@@ -16,10 +16,23 @@ import Users from './pages/Users'
 import Profile from './pages/Profile'
 import styles from './App.module.css'
 
+function AppLoader({ children }: { children: React.ReactNode }) {
+  const loading = useLibraryStore((state) => state.loading)
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div style={{ color: 'var(--text-muted)' }}>Завантаження...</div>
+      </div>
+    )
+  }
+  return <>{children}</>
+}
+
 export default function App(){
+  const { initialize } = libraryActions
   useEffect(() => {
-    void libraryActions.initialize()
-  }, [])
+    void initialize()
+  }, [initialize])
 
   return (
     <div className={styles.app}>
