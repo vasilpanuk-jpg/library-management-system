@@ -119,7 +119,7 @@ export const libraryActions = {
     try {
       const session = await libraryApi.checkSession()
       if (!session.ok) {
-        setState({ currentUser: null, books: [], loans: [], users: [], dashboard: null })
+        setState({ currentUser: null, books: [], loans: [], users: [], dashboard: null, loading: false })
         return
       }
       setState({ currentUser: session.user })

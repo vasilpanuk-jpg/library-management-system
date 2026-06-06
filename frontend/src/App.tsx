@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { libraryActions, useLibraryStore } from './state/libraryStore'
 import TopNav from './components/layout/TopNav'
@@ -18,13 +18,14 @@ import styles from './App.module.css'
 
 export default function App(){
   const { initialize } = libraryActions
-  const loading = useLibraryStore((state) => state.loading)
+  const currentUser = useLibraryStore((state) => state.currentUser)
+  const [isInitializing, setIsInitializing] = useState(true)
   
   useEffect(() => {
-    void initialize()
+    initialize().finally(() => setIsInitializing(false))
   }, [initialize])
 
-  if (loading) {
+  if (isInitializing) {
     return (
       <div className={styles.app}>
         <TopNav />
