@@ -41,7 +41,9 @@ public class LoanDto {
         if (loan.getReturnedDate() != null || "RETURNED".equalsIgnoreCase(loan.getStatus())) {
             return "returned";
         }
-        if (loan.getDueDate() != null && loan.getDueDate().isBefore(LocalDate.now())) {
+        // Check for OVERDUE status or if loan is past due date and not returned
+        if ("OVERDUE".equalsIgnoreCase(loan.getStatus()) ||
+            (loan.getDueDate() != null && loan.getDueDate().isBefore(LocalDate.now()) && loan.getReturnedDate() == null)) {
             return "overdue";
         }
         return "active";
