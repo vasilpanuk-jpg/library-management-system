@@ -62,6 +62,8 @@ export type DashboardSnapshot = {
   issuedBooks: number
   overdueLoans: number
   averageLoanDays: number
+  weekIssued: number
+  weekReturned: number
   popularBooks: { title: string; count: number }[]
   readerActivity: { name: string; count: number }[]
 }

@@ -7,15 +7,14 @@ import StatCard from '../components/ui/StatCard'
 import ChartPanel from '../components/ui/ChartPanel'
 import styles from './Reports.module.css'
 import { libraryApi } from '../services/libraryApi'
-import { selectDashboardSnapshot, selectReportMetrics, useLibraryStore } from '../state/libraryStore'
+import { selectDashboardSnapshot, useLibraryStore } from '../state/libraryStore'
 import { integerBarChartOptions } from '../utils/chartOptions'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 export default function Reports() {
-  useLibraryStore()
+  const { currentUser } = useLibraryStore()
   const [exportError, setExportError] = useState<string | null>(null)
-  const metrics = selectReportMetrics()
   const snapshot = selectDashboardSnapshot()
 
   const inventoryData = {
@@ -75,18 +74,16 @@ export default function Reports() {
       subtitle="Найпопулярніші книги, кількість видач, активність читачів, середній час читання, прострочки та експорт у PDF/Excel."
     >
       <section className={styles.metricsGrid}>
-        {metrics.map((metric, index) => (
-          <StatCard
-            key={metric.label}
-            label={metric.label}
-            value={`${metric.value}${metric.detail ? ` ${metric.detail}` : ''}`}
-            tone={index === 0 ? 'primary' : index === 1 ? 'success' : index === 2 ? 'secondary' : index === 3 ? 'warning' : 'danger'}
-          />
-        ))}
+        <StatCard label="Загалом примірників" value={`${Math.round(snapshot.totalBooks ?? 0)}`} tone="primary" />
+        <StatCard label="Взято на цей тиждень" value={`${Math.round(snapshot.weekIssued ?? 0)}`} tone="secondary" />
+        <StatCard label="Повернуто на цей тиждень" value={`${Math.round(snapshot.weekReturned ?? 0)}`} tone="success" />
+        <StatCard label="Всього у наявності" value={`${Math.round(snapshot.availableBooks ?? 0)}`} tone="success" />
+        <StatCard label="Видано" value={`${Math.round(snapshot.issuedBooks ?? 0)}`} tone="warning" />
+        <StatCard label="Прострочено" value={`${Math.round(snapshot.overdueLoans ?? 0)}`} tone="danger" />
       </section>
 
       <section className={styles.chartGrid}>
-        <ChartPanel title="Стан фонду" subtitle="Загальна кількість, доступні та видані книги">
+        <ChartPanel title="Стан фонду" subtitle="Загальна кількість, доступні, видані, прострочені">
           <Bar data={inventoryData} options={integerBarChartOptions} />
         </ChartPanel>
 
@@ -99,14 +96,16 @@ export default function Reports() {
         </ChartPanel>
       </section>
 
-      <section className={styles.exportCard}>
-        <SectionHeader title="Експорт звітів" subtitle="Формуйте PDF або Excel одним натисканням" />
-        <div className={styles.exportActions}>
-          <button type="button" onClick={() => void download('excel')}>Завантажити Excel</button>
-          <button type="button" className={styles.secondary} onClick={() => void download('pdf')}>Завантажити PDF</button>
-        </div>
-        {exportError && <p className={styles.exportError}>{exportError}</p>}
-      </section>
+      {(currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ROLE_LIBRARIAN') && (
+        <section className={styles.exportCard}>
+          <SectionHeader title="Експорт звітів" subtitle="Формуйте PDF або Excel одним натисканням" />
+          <div className={styles.exportActions}>
+            <button type="button" onClick={() => void download('excel')}>Завантажити Excel</button>
+            <button type="button" onClick={() => void download('pdf')}>Завантажити PDF</button>
+          </div>
+          {exportError && <p className={styles.exportError}>{exportError}</p>}
+        </section>
+      )}
     </PageShell>
   )
 }

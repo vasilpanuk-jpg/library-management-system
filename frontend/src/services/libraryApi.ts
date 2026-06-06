@@ -53,6 +53,8 @@ type DashboardApi = {
   issuedBooks: number
   overdueLoans: number
   averageLoanDays: number
+  weekIssued: number
+  weekReturned: number
   popularBooks: { name: string; count: number }[]
   readerActivity: { name: string; count: number }[]
 }
@@ -100,6 +102,8 @@ function mapDashboard(data: DashboardApi): DashboardSnapshot {
     issuedBooks: toInt(data.issuedBooks),
     overdueLoans: toInt(data.overdueLoans),
     averageLoanDays: toInt(data.averageLoanDays),
+    weekIssued: toInt(data.weekIssued),
+    weekReturned: toInt(data.weekReturned),
     popularBooks: data.popularBooks.map((item) => ({ title: item.name, count: toInt(item.count) })),
     readerActivity: data.readerActivity.map((item) => ({ name: item.name, count: toInt(item.count) })),
   }

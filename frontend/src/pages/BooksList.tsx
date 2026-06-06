@@ -58,19 +58,14 @@ export default function BooksList() {
                 book={book}
                 actions={
                   <>
-                    {currentUser?.role === 'ROLE_READER' && (
-                      <button type="button" onClick={() => openIssueFlow(book.id)} disabled={book.availableCopies === 0}>
-                        {book.availableCopies > 0 ? 'Позичити' : 'Немає в наявності'}
+                    {(currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ROLE_LIBRARIAN') && (
+                      <button type="button" className={styles.secondaryButton} onClick={() => openIssueFlow(book.id)} disabled={book.availableCopies === 0}>
+                        {book.availableCopies > 0 ? 'Видати читачу' : 'Немає в наявності'}
                       </button>
                     )}
-                    {(currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ROLE_LIBRARIAN') && (
-                      <Link to="/loans" className={styles.secondaryButton}>
-                        Видати читачу
-                      </Link>
+                    {(currentUser?.role === 'ROLE_READER') && (
+                      <span style={{ fontSize: '12px', opacity: 0.7 }}>Видача доступна тільки для бібліотекаря</span>
                     )}
-                    <Link to="/reports" className={styles.ghostButton}>
-                      Дивитися звіти
-                    </Link>
                   </>
                 }
               />
